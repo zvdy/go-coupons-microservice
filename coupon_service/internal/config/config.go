@@ -19,7 +19,7 @@ func New() Config {
 	}
 	//missing port and host
 	cfg.API.Port = 8080
-	cfg.API.Host = "localhost"
+	cfg.API.Host = "0.0.0.0"
 	fmt.Println(cfg)
 	return cfg
 }

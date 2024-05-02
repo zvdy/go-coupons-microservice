@@ -1,2 +1,4 @@
 debug/
 .vscode/
+go.mod
+go.sum

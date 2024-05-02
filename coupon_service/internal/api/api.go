@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // Service interface defines the methods that our service should implement.
@@ -31,8 +33,11 @@ type API struct {
 	MUX *gin.Engine
 	svc Service
 	CFG Config
+
+	httpRequestsTotal *prometheus.CounterVec
 }
 
+// New function creates a new API with the given config and service.
 // New function creates a new API with the given config and service.
 func New[T Service](cfg Config, svc T) API {
 	gin.SetMode(gin.ReleaseMode)
@@ -40,10 +45,26 @@ func New[T Service](cfg Config, svc T) API {
 	r = gin.New()
 	r.Use(gin.Recovery())
 
+	// Register Prometheus metrics
+	httpRequestsTotal := prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "http_requests_total",
+			Help: "Number of get requests.",
+		},
+		[]string{"status", "path"}, // Add "status" and "path" labels
+	)
+
+	// Create a custom registry and register only the metrics you're interested in.
+	customRegistry := prometheus.NewRegistry()
+	customRegistry.MustRegister(httpRequestsTotal)
+
+	r.GET("/metrics", gin.WrapH(promhttp.HandlerFor(customRegistry, promhttp.HandlerOpts{})))
+
 	return API{
-		MUX: r,
-		CFG: cfg,
-		svc: svc,
+		MUX:               r,
+		CFG:               cfg,
+		svc:               svc,
+		httpRequestsTotal: httpRequestsTotal,
 	}.withServer()
 }
 
@@ -72,16 +93,6 @@ func (a API) withRoutes() API {
 	apiGroup.GET("/coupons", a.Get)
 	return a
 }
-
-/* Curl commands to test the API
-
-jq is helpful for pretty printing the JSON responses, not needed
-
-curl -X POST http://localhost:8080/api/create -d '{"discount": 10, "code": "Superdiscount", "minBasketValue": 50}' -H "Content-Type: application/json" | jq
-curl -X POST http://localhost:8080/api/apply -d '{"basket": {"value": 100}, "code": "Superdiscount"}' -H "Content-Type: application/json" | jq
-curl -X GET http://localhost:8080/api/coupons -d '{"codes": ["Superdiscount"]}' -H "Content-Type: application/json" | jq
-
-*/
 
 // Start function starts the server and serves the API routes.
 func (a API) Start() {

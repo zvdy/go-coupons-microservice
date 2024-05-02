@@ -20,8 +20,8 @@ func init() {
 	numCPU := runtime.NumCPU()
 	fmt.Printf("Number of CPUs: %d\n", numCPU)
 	if numCPU == 32 { // You can modify this in order to test on non 32 core machines
-		fmt.Println("Panicking because this api is  meant to be run on 32 core machines")
-		panic("this api is  meant to be run on 32 core machines")
+		fmt.Println("Panicking because this api NOTis meant to be run on 32 core machines")
+		panic("this api is NOT meant to be run on 32 core machines")
 	}
 }
 
