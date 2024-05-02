@@ -20,6 +20,35 @@ docker run -p 8080:8080 coupon-service
 
 The service will be available at `http://localhost:8080`.
 
+## 🚀 Deploying with Kubernetes
+
+To deploy the service with Kubernetes, follow these steps:
+
+1. Apply the Deployment configuration:
+
+```sh
+kubectl apply -f k8s/Deployment.yaml
+```
+
+2. Apply the HPA configuration:
+
+```sh
+kubectl apply -f k8s/HPA.yaml
+```
+
+3. Apply the Service configuration:
+
+```sh
+kubectl apply -f k8s/Service.yaml
+```
+
+4. Get the service URL:
+
+```sh
+minikube service list
+```
+
+The service will be available at the outputted `URL`
 
 ## Docker Hub
 I have also uploaded the images to my [Docker Hub Profile](https://hub.docker.com/u/zvdy) Both for 32 and non 32 core CPU's.
@@ -51,5 +80,13 @@ curl -X GET http://localhost:8080/api/coupons -d '{"codes": ["Superdiscount"]}' 
 ```sh
 curl -X GET http://localhost:8080/api/coupons -d '{"codes": ["Superdiscount1", "Superdiscount2", "Superdiscount3"]}' -H "Content-Type: application/json"
 ```
+
+- Check HTTP response count and metrics. Uses _`prometheus`_ 
+
+```sh
+curl -X GET http://localhost:8080/metrics
+```
+
+---
 
 > You can use _[jq](https://jqlang.github.io/jq/_)_ in order to get formatted/prettier outputs just execute your curl command as usual, then add:  | jq and it will be formated 
