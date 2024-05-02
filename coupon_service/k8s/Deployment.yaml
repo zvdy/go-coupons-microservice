@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coupon-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: coupon-service
+  template:
+    metadata:
+      labels:
+        app: coupon-service
+    spec:
+      containers:
+      - name: coupon-service
+        image: zvdy/go-coupon-microservice-non32
+        ports:
+        - containerPort: 8080
