@@ -90,3 +90,5 @@ curl -X GET http://localhost:8080/metrics
 ---
 
 > You can use _[jq](https://jqlang.github.io/jq/_)_ in order to get formatted/prettier outputs just execute your curl command as usual, then add:  | jq and it will be formated 
+
+#### > [!] For a repo with `more implementations` such as `Kubernetes cluster deployment` and `prometheus /metrics endpoint` check the [dev branch](https://github.com/zvdy/go-coupons-microservice/tree/dev)
