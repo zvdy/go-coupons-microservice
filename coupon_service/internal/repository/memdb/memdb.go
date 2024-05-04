@@ -5,9 +5,6 @@ import (
 	"fmt"
 )
 
-// Config is a struct that can be used to configure the repository.
-type Config struct{}
-
 // repository is an interface that defines the methods that a coupon repository should have.
 type repository interface {
 	// FindByCode finds a coupon by its code.
