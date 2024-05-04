@@ -4,6 +4,7 @@ import (
 	// changed dot import https://go.dev/wiki/CodeReviewComments#import-dot and added entity. prefix
 	"coupon_service/internal/service/entity"
 	"fmt"
+	"sync"
 
 	"github.com/google/uuid"
 )
@@ -70,19 +71,34 @@ func (s Service) CreateCoupon(discount int, code string, minBasketValue int) (*e
 // GetCoupons returns a list of coupons for given codes
 // If a coupon is not found for a code, it adds an error message to the returned error
 func (s Service) GetCoupons(codes []string) ([]entity.Coupon, error) {
-	coupons := make([]entity.Coupon, 0, len(codes))
-	var e error = nil
+	coupons := make([]entity.Coupon, len(codes))
+	errors := make([]error, len(codes))
+
+	var wg sync.WaitGroup
+	wg.Add(len(codes))
 
 	for idx, code := range codes {
-		coupon, err := s.repo.FindByCode(code)
+		go func(idx int, code string) {
+			defer wg.Done()
+			coupon, err := s.repo.FindByCode(code)
+			if err != nil {
+				errors[idx] = fmt.Errorf("code: %s, index: %d, error: %v", code, idx, err)
+			}
+			coupons[idx] = *coupon
+		}(idx, code)
+	}
+
+	wg.Wait()
+
+	var e error = nil
+	for _, err := range errors {
 		if err != nil {
 			if e == nil {
-				e = fmt.Errorf("code: %s, index: %d", code, idx)
+				e = err
 			} else {
-				e = fmt.Errorf("%w; code: %s, index: %d", e, code, idx)
+				e = fmt.Errorf("%w; %v", e, err)
 			}
 		}
-		coupons = append(coupons, *coupon)
 	}
 
 	return coupons, e
